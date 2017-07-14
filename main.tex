@@ -8,6 +8,11 @@
 
 \usepackage{minted}
 \usemintedstyle{tango}
+%interactive references in pdf (slower compilation times)
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,
+}
 
 % Stop chapters from starting new pages
 % \usepackage{etoolbox}
@@ -22,10 +27,16 @@
 % \date{}
 
 % todo List:
+% @todo change author to Paul / FLAME GPU contirbutors
 % @todo Create nice title page
 % @todo improve document formatting
-% @todo better labels (meaningful)
-% @todo use lstlistings with custom highlighting rules to replace slow minted compilation on overleaf?
+% @todo better labels (meaningful rather than old section numbers)
+% @todo use lstlistings with custom highlighting rules to replace slow minted compilation
+% @todo Complete section on using Makefile
+% @todo Complete section(s) on graph based communication
+% @todo complete section on staticGraph data structure
+% @todo describe instrumentation #defines
+% @todo add details of host agent creation in init/step fns
 
 \begin{document}
 
@@ -152,7 +163,7 @@ Simulation constants are defined as (global) variables and may be of type int, f
 Constant variables must each have a unique name which is used to reference them within simulation code and can have an optional static array length (of size greater than 0).
 The description element arrayLength element and defaultValue element are all optional.
 The below code shows the specification of two constant variables: the first represents a single \mintinline[fontsize=\small]{c}{int} constant (with a default value of $1$), the second indicates an \mintinline[fontsize=\small]{c}{int} array of length 5.
-Details on how to set constant variables is described in \cref{sec:39}.
+Simulation constants can be set either as default values as show below, within the initial agent XML file (see \cref{271}) or at run-time are described in \cref{sec:39}. Values set in initial XML values will overwrite a default value and values which are set at runtime will overwrite values set in initial agent XML files.
 
 \begin{minted}[fontsize=\small,breaklines]{XML}
 <gpu:constants>
@@ -434,6 +445,10 @@ For continuously spaced agents in 2D space $P$ should be equal to $1$ and theref
 </gpu:partitioningSpatial>
 \end{minted}
 
+% \subsection{Graph-Based Communication Messages}
+% \label{ssec:graph-comm-xml}
+% \textbf{@todo}
+
 
 \section{Defining an Agent function}
 \label{sec:25}
@@ -646,8 +661,8 @@ There are no dependencies between \mintinline[fontsize=\small]{text}{function1} 
 \label{sec:27}
 
 
-The initial agent data information is stored in an XML file which is used passed to the simulator as a parameter before running the simulation.
-Within this initial agent data XML file a single states element contains a single iteration number (\mintinline[fontsize=\small]{text}{itno}) and any number (including 0) of xagent elements.
+The initial agent data information is stored in an XML file which is passed to the simulator as a parameter before running the simulation.
+Within this initial agent data XML file, a single states element contains a single iteration number (\mintinline[fontsize=\small]{text}{itno}) and any number (including 0) of xagent elements.
 The syntax of the xagent element depends on the agent definitions contained within the XMML model definition file.
 A name element is always required and must represent an agent name contained within a \mintinline[fontsize=\small]{text}{xgents/gpu:agent/name} element in the XMML model definition.
 Following this an element may exist for each of the named agents memory variables (\mintinline[fontsize=\small]{text}{xagents/gpu:agent/memory/gpu:variable/name}).
@@ -675,6 +690,35 @@ If buffer size is exceeded during initial loading of the initial agent data then
 
 Another special case to consider is the use of 2D discrete agents where the number of agents within the set of initial agent data must match exactly the bufferSize (which must also be a power of 2) defined within the XMML models agent definition.
 Furthermore the simulation will expect to find initial agents stored within the XML file in row wise ascending order.
+
+\subsection{Initial Simulation Constants}
+\label{sec:271}
+
+Simulation constants (or global variables) specified within the model file (as described in \cref{sec:229}) can be set within the initial XML agent data within an environment label between the itno and xagent elements. Environment variables should be set within an XML element with a name corresponding to the environment variable name. E.g. An environment variable defined within the model file as;
+
+\begin{minted}[fontsize=\small,breaklines]{XML}
+<gpu:constants>
+    <gpu:variable>
+        <type>int</type>
+        <name>my_variable</name>
+        <description>none</description>
+        <defaultValue>1</defaultValue>
+    </gpu:variable>
+</gpu:constants>
+\end{minted}
+
+Could be defined within an initial XML agents file as follows;
+
+\begin{minted}[fontsize=\small,breaklines]{XML}
+<states>
+<itno>0</itno>
+    <environment>
+        <my_variable>2</my_variable>
+    </environment>
+...
+\end{minted}
+
+Note that the value obtained from the initial XML agents file will over-wite any default value.
 
 \chapter{FLAMEGPU Agent Function Scripts and the Simulation API}
 \label{ch:3}
@@ -937,6 +981,10 @@ __FLAME_GPU_FUNC__ int input_messages(xmachine_memory_cell* xmemory, xmachine_me
 }
 \end{minted}
 
+% \subsection{Graph-Based Communication Message Iteration}
+% \label{sec:graph-comm-message-iteration}
+% \textbf{@todo}
+
 
 \section{Use of the Agent Output Simulation API}
 \label{sec:36}
@@ -1015,8 +1063,8 @@ __FLAME_GPU_FUNC__ int function(xmachine_memory_agent_name* agent,
 \label{sec:39}
 
 
-Simulation constants defined within the environment section of the XMML model definition may be directly referenced within an agent function using the name specified within the variable definition (see \cref{sec:221}).
-It is not possible to set constant variables within an agent function however the simulation API creates methods for setting simulation constants which may be called either at the start of the simulation (either manually or within an initialisation function) or between simulation iterations (for example as part of an interactive visualisation).
+Simulation constants defined within the environment section of the XMML model definition (or the intial agents state file) may be directly referenced within an agent function using the name specified within the variable definition (see \cref{sec:221}).
+It is not possible to set constant variables within an agent function however, the simulation API creates methods for setting simulation constants which may be called either at the start of the simulation (either manually or within an initialisation function) or between simulation iterations (for example as part of an interactive visualisation).
 The code below demonstrates the function prototype for setting a simulation constant with the name \mintinline[fontsize=\small]{text}{A_CONSTANT}.
 
 
@@ -1072,7 +1120,7 @@ __FLAME_GPU_EXIT_FUNC__ void some_exit_func()
 \section{Instrumentation for timing and population sizes}
 \label{sec:TimingAndPop}
 
-Per-iteration and per-function (init/agent/step/exit functions) timing using cuda events, and also the population size for each agent state per iteration printed to stdout.
+It is possible to obtain information of population and timinings of different functions by taking advantage of cuda timing events. Per-iteration and per-function (init/agent/step/exit functions) timing using cuda events, and also the population size for each agent state per iteration printed to stdout.
 
 This instrumentation is enabled with a set of defines. The value must be a positive non-zero integer (i.e. 1) to be enabled.
 
@@ -1291,6 +1339,11 @@ The Command Arguments have been set the simulation executable can be launched by
     \caption{FLAME GPU Project Properties Page}
     \label{fig:project-properties-page}
 \end{figure} 
+
+\section{Compilation using Make}
+\label{sec:compilation-makefile}
+
+\textbf{@todo}
 
 \section{Simulation Execution Modes and Options}
 \label{sec:45}
