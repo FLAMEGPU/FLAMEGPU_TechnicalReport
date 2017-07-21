@@ -20,6 +20,71 @@
 % \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
 % \makeatother
 
+% Will replace minted
+\usepackage{listings, color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{gray}{rgb}{0.4,0.4,0.4}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{lightblue}{rgb}{0.0,0.0,0.9}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+\definecolor{darkred}{rgb}{0.6,0.0,0.0}
+
+%\footnotesize
+\lstset{
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  showstringspaces=false,
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=1,
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=none,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title  
+  commentstyle=\color{gray}\upshape
+}
+
+\lstdefinelanguage{C_}
+{
+keywordstyle=\color{blue},
+stringstyle=\color{red},
+commentstyle=\color{green},
+morecomment=[l][\color{magenta}]{\#},
+morecomment=[l][\color{magenta}]{\//},
+morecomment=[s][\color{magenta}]{/*}{*/},
+morecomment=[s][\color{magenta}]{->},
+morekeywords={__FLAME_GPU_FUNC__,return,if,int,float,while,void,
+              __FLAME_GPU_INIT_FUNC__,__FLAME_GPU_STEP_FUNC__,
+              __FLAME_GPU_STEP_FUNC__, extern, unsigned,CONTINUOUS}
+}
+
+\lstdefinelanguage{XML}
+{
+  morestring=[s][\color{mauve}]{"}{"},
+  morestring=[s][\color{black}]{>}{<},
+  morecomment=[s]{<?}{?>},
+  morecomment=[s][\color{dkgreen}]{<!--}{-->},
+  stringstyle=\color{black},
+  identifierstyle=\color{lightblue},
+  keywordstyle=\color{red},
+  morekeywords={xmlns,gpu}% list the attributes
+}
+
+
+
+
 
 \title{FLAME GPU Technical Report and User Guide}
 \author{Paul Richmond}
@@ -127,7 +192,9 @@ Within this chapter the XML namespace (xmlns) gpu is used to qualify the XML ele
 A high level overview of a an XMML model file is described below with various sections within this chapter describing each part in more detail.
 
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+
+
+\begin{lstlisting}[language=XML]
 <gpu:xmodel
     xmlns:gpu="http://www.dcs.shef.ac.uk/\textasciitilde{}paul/XMMLGPU"
     xmlns="http://www.dcs.shef.ac.uk/\textasciitilde{}paul/XMML">
@@ -137,7 +204,7 @@ A high level overview of a an XMML model file is described below with various se
     <messages>...</messages>
     <layers>...</layers>
 </gpu:xmodel>
-\end{minted}
+\end{lstlisting}
 
 \section{The Environment}
 \label{sec:22}
@@ -146,7 +213,8 @@ A high level overview of a an XMML model file is described below with various se
 The environment element is used to hold global information which relates to the simulation.
 This information includes, zero or more constant, or global, variables (which are constant for all agents over the period of either the simulation or single simulation iteration), a single non optional function file containing agent function script (see \Cref{ch:3}) and an optional number of initialisation, step and exit functions.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+
+\begin{lstlisting}[language=XML]
 <gpu:environment>
     <gpu:constants>...</gpu:constants>            <!-- optional -->
     <gpu:functionFiles>...</gpu:functionFiles>    <!-- not optional -->
@@ -154,7 +222,8 @@ This information includes, zero or more constant, or global, variables (which ar
     <gpu:stepFunctions>...</gpu:stepFunctions>    <!-- optional -->
     <gpu:endFunctions>...</gpu:endFunctions>      <!-- optional -->
 </gpu:environment>
-\end{minted}
+\end{lstlisting}
+
 
 \subsection{Simulation Constants (Global Variables)}
 \label{sec:221}
@@ -165,7 +234,8 @@ The description element arrayLength element and defaultValue element are all opt
 The below code shows the specification of two constant variables: the first represents a single \mintinline[fontsize=\small]{c}{int} constant (with a default value of $1$), the second indicates an \mintinline[fontsize=\small]{c}{int} array of length 5.
 Simulation constants can be set either as default values as show below, within the initial agent XML file (see \cref{271}) or at run-time are described in \cref{sec:39}. Values set in initial XML values will overwrite a default value and values which are set at runtime will overwrite values set in initial agent XML files.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+
+\begin{lstlisting}[language=XML]
 <gpu:constants>
     <gpu:variable>
         <type>int</type>
@@ -180,7 +250,7 @@ Simulation constants can be set either as default values as show below, within t
         <arrayLength>5</arrayLength>
     </gpu:variable>
 </gpu:constants>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Function Files}
 \label{sec:222}
@@ -190,11 +260,11 @@ The functionFiles element is not optional and must contain a single file element
 More details on the format of the function file are given in \Cref{ch:3}.
 The example below shows the correct XML format for a function file named \mintinline[fontsize=\small]{text}{functions.c}.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:functionFiles>
     <file>functions.c</file>
 </gpu:functionFiles>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Initialisation Functions}
 \label{sec:223}
@@ -205,13 +275,13 @@ Any initialisation functions defined within the initFunctions element are called
 If an initFunctions element is specified there must be at least a single initFunction child element with a unique name. 
 \Cref{sec:391} demonstrates how to specify initialisation functions within a function file.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:initFunctions>
     <gpu:initFunction>
         <gpu:name>initConstants</gpu:name>
     </gpu:initFunction>
 </gpu:initFunctions>
-\end{minted}
+\end{lstlisting}
 
 
 \subsection{Step Functions}
@@ -219,26 +289,26 @@ If an initFunctions element is specified there must be at least a single initFun
 
 Step functions are similarly defined to initialisation functions, requiring at least a single stepFunction child element if the stepFunctions element is defined. These functions are called at the end of each iteration step, i.e. after all the layers, as defined in section \ref{sec:26}, are executed each step. Example uses of this function are to calculate agent averages during the iteration step or sort functions.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:stepFunctions>
     <gpu:stepFunction>
         <gpu:name>some_step_func</gpu:name>
     </gpu:stepFunction>
 </gpu:stepFunctions>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Exit Functions}
 \label{sec:exitFunc}
 
 Exit functions are again like the other function types defined above, requiring at least a single exitFunction child element if the exitFunctions element is defined. These functions are called at the end of the whole simulation. An example use of this function would be to calculate final averages of agent variables or print out final values.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:exitFunctions>
     <gpu:exitFunction>
         <gpu:name>some_exit_func</gpu:name>
     </gpu:exitFunction>
 </gpu:exitFunctions>
-\end{minted}
+\end{lstlisting}
 
 
 \section{Defining an X-Machine Agent}
@@ -259,7 +329,7 @@ For discrete agents the bufferSize is currently limited to only power of 2 numbe
 If at any point in the simulation exceeds the stated bufferSize then the user will be warned at the simulation will exit.
 Each expandable aspect of an XMML agent representation in the below example is discussed within this section with the exception of agent functions, which due to their dependence of the definition of messages, are discussed later in \cref{sec:25}.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <xagents>
     <gpu:xagent>
     <name>AgentName</name>
@@ -274,7 +344,7 @@ Each expandable aspect of an XMML agent representation in the below example is d
         <!-- ... -->
     </gpu:xagent>
 </xagents>
-\end{minted}
+\end{lstlisting}
 
 
 \subsection{Agent Memory}
@@ -288,7 +358,7 @@ There are no specified limits on the maximum number of agent variables however t
 Agent memory can also be defined as static sized array. For performance use sizes that are a multiple of 2(?)
 Below shows an example of agent memory containing four agent variables representing an agent identifier, two positional values and a list of numbers.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <memory>
     <gpu:variable>
         <type>int</type>
@@ -309,7 +379,7 @@ Below shows an example of agent memory containing four agent variables represent
         <arrayLength>64</arrayLength>
     </gpu:variable>
 </memory>
-\end{minted}
+\end{lstlisting}
 
 
 \subsection{Agent States}
@@ -319,7 +389,7 @@ Agent states are defined as a list of state elements ($Q$ in the X-Machine forma
 As simulations within FLAMEGPU can continue indefinitely (or for a fixed number of iterations), terminal states ($T$ in the formal definition) are not defined.
 The initial state ($q_{0}$) must however be defined within the initialState element and must correspond with an existing and unique state name from the list of states above it.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <states>
     <gpu:state>
         <name>state1</name>
@@ -329,7 +399,7 @@ The initial state ($q_{0}$) must however be defined within the initialState elem
     </gpu:state>
     <initialState>state1</initialState>
 </states>
-\end{minted}
+\end{lstlisting}
 
 \section{Defining Messages}
 \label{sec:24}
@@ -341,7 +411,7 @@ The \mintinline[fontsize=\small]{c}{bufferSize} element is used in the same way 
 The partitioning type may be one of three currently defined message partition schemes, non partitioned (\mintinline[fontsize=\small]{c}{partitioningNone}), discrete 2D space partitioning (\mintinline[fontsize=\small]{c}{partitioningDiscrete}) or 2D/3D spatially partitioned space (\mintinline[fontsize=\small]{c}{partitioningSpatial}).
 Message partition schemes are used to ensure that the most optimal cycling of messages occurs within agent functions. The use of the partitioning techniques is described within this section, as are message variables.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <messages>
     <gpu:message>
         <name>message_name</name>
@@ -352,7 +422,7 @@ Message partition schemes are used to ensure that the most optimal cycling of me
     </gpu:message>
     <gpu:message>...</gpu:message>
 </messages>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Message Variables}
 \label{sec:241}
@@ -370,7 +440,7 @@ Spatial partitioning requires three \mintinline[fontsize=\small]{c}{float} (or \
 The example below shows an example of message memory containing two message variables named id and message\_variable.
 
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <variables>
     <gpu:variable>
         <type>int</type>
@@ -382,7 +452,7 @@ The example below shows an example of message memory containing two message vari
         <name>message_variable</name>
     </gpu:variable>
 </variables>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Non partitioned Messages}
 \label{sec:242}
@@ -395,9 +465,9 @@ There is no strict rule governing performance and different GPU hardware will pr
 It is therefore left to the user to experiment with different message partitioning types within a simulation.
 The example below shows the format of the partitioningNone element tag.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:partitioningNone/>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Discrete Partitioned Messages}
 \label{sec:243}
@@ -410,11 +480,11 @@ a range of $1$ will iterate $3x3=9$ messages, a range of $2$ will iterate $5x5=2
 In addition to this the agent memory is expected to contain x and y variables of type \mintinline[fontsize=\small]{c}{int}.
 As with discrete agents it is important to ensure that messages using discrete partitioning use only supported buffer sizes (power of $2$ and squarely divisible). The width and height of the discrete message space is then defined as the square of the bufferSize value.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:partitioningDiscrete>
     <gpu:radius>1</gpu:radius>
 </gpu:partitioningDiscrete>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Spatially Partitioned Messages}
 \label{sec:244}
@@ -433,7 +503,7 @@ Spatially partitioned message iteration can then iterate a varying number of mes
 The following example defines a spatial partition in three dimensions.
 For continuously spaced agents in 2D space $P$ should be equal to $1$ and therefore a \mintinline[fontsize=\small]{text}{zmin} of $0$ would require a \mintinline[fontsize=\small]{text}{zmax} value equal to radius (even in this case a message variable with name \mintinline[fontsize=\small]{c}{z} is still required).
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:partitioningSpatial>
     <gpu:radius>1</gpu:radius>
     <gpu:xmin>0</gpu:xmin>
@@ -443,7 +513,7 @@ For continuously spaced agents in 2D space $P$ should be equal to $1$ and theref
     <gpu:zmin>0</gpu:zmin>
     <gpu:zmax>10</gpu:zmax>
 </gpu:partitioningSpatial>
-\end{minted}
+\end{lstlisting}
 
 % \subsection{Graph-Based Communication Messages}
 % \label{ssec:graph-comm-xml}
@@ -465,7 +535,7 @@ The RNG element represents a flag to indicate the requirement of random number g
 If this value is true then an additional parameter (demonstrated in \cref{sec:37}) is passed to the agent function which holds a number of seeds used for parallel random number generation.
 
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <functions>
     <gpu:function>
         <name>func_name</name>
@@ -481,7 +551,7 @@ If this value is true then an additional parameter (demonstrated in \cref{sec:37
         <gpu:RNG>true</gpu:RNG>                        <!-- optional -->
     </gpu:function>
 </functions>
-\end{minted}
+\end{lstlisting}
 
 
 \subsection{Agent Function Message Inputs}
@@ -492,13 +562,13 @@ An agent function message input indicates that the agent function will iterate t
 It is therefore required that the messageName element refers to an existing message/name defined within the XMML document.
 In addition to this an agent function cannot iterate a list of messages without specifying that it is an input within the XMML model file (message iteration functions are parameterised to prevent this).
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <inputs>
     <gpu:input>
         <messageName>message_name</messageName>
     </gpu:input>
 </inputs>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Agent Function Message Outputs}
 \label{sec:252}
@@ -513,14 +583,14 @@ no partitioning or spatial partitioning).
 The example below shows a message output using \mintinline[fontsize=\small]{c}{single_message} type.
 This will assume every agent outputs a message, if the functions script fails to output a message for every agent a message with default values (of $0$) will be created instead.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <outputs>
     <gpu:output>
         <messageName>message_name</messageName>
         <gpu:type>single_message</gpu:type>
     </gpu:output>
 </outputs>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Agent Function X-Agent Outputs}
 \label{sec:253}
@@ -536,14 +606,14 @@ The creation of new discrete agents is not permitted under any circumstance.
 An \mintinline[fontsize=\small]{c}{xagentOutput} does not require a type (as is the case with a message output) and any agent function outputting an agent is assumed to be optional.
 I.e. each agent performing the function may output either one or zero agents.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <xagentOutputs>
     <gpu:xagentOutput>
         <xagentName>agent_name</xagentName>
         <state>state1</state>
     </gpu:xagentOutput>
 </xagentOutputs>
-\end{minted}
+\end{lstlisting}
 
 \subsection{Function Conditions}
 \label{sec:254}
@@ -557,7 +627,7 @@ A value element may refer to any numeric value or constant definition (defined w
 The use of recursive conditions is demonstrated below by embedding a condition within the \mintinline[fontsize=\small]{text}{rhs} element of the top level condition.
 
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <condition>
     <lhs>
         <agentVariable>variable_name</agentVariable>
@@ -575,41 +645,41 @@ The use of recursive conditions is demonstrated below by embedding a condition w
         </condition>
     </rhs>
 </condition>
-\end{minted}
+\end{lstlisting}
 
 In the above example the function condition generates the following pseudo code function guard;
 
-\begin{minted}[fontsize=\small,breaklines]{c}
+\begin{lstlisting}[language=C_]
 (variable_name) < ((variable_name2)+(1))
-\end{minted}
+\end{lstlisting}
 
 The condition element may refer to any logical operator.
 Care must be taken when using angled brackets which in standard form will cause the XML syntax to become invalid.
 Rather than the left hand bracket (less than) the correct xml syntax of 
-\mintinline[fontsize=\small]{text}{&lt;} should be used.
+\verb|&lt;| should be used.
 Likewise the right hand bracket (greater than) should be replaced with 
-\mintinline[fontsize=\small]{text}{&gt;}.
+\verb|&gt;|.
 
 
 \subsection{Global Function Conditions}
 \label{sec:255}
 
 
-An agent global function condition is similar to an agent function in its syntax however it acts as a global switch to determine if the function should be applied to either \emph{all} or \emph{none} of the agents (within the correct state specified by \mintinline[fontsize=\small]{text}{currentState}).
-In the case of every agent evaluating the global function condition to true (or to the value specified by the \mintinline[fontsize=\small]{text}{mustEvaluateTo} element) the agent function is applied to \emph{all} of the agents.
-In the case that any of the agents evaluate the global function condition to false (or to the logical opposite of the value specified by the \mintinline[fontsize=\small]{text}{mustEvaluateTo} element) then the agent function will be applied to \emph{none} of the agents.
-As with an agent function condition a globalCondition consists of a left hand side statement (\mintinline[fontsize=\small]{text}{lhs}), an operator and a right hand side statement (\mintinline[fontsize=\small]{text}{rhs}).
-The syntax of the left hand side statement (\mintinline[fontsize=\small]{text}{lhs}), the operator and the right hand side statement (\mintinline[fontsize=\small]{text}{rhs}) is the same as with an agent function condition and may use recursion to generate a complex conditional statement.
-The maxItterations element is used to limit the number of times a function guarded by the global condition can be avoided (or evaluated as the logical opposite of the value specified by the \mintinline[fontsize=\small]{text}{mustEvaluateTo} element).
+An agent global function condition is similar to an agent function in its syntax however it acts as a global switch to determine if the function should be applied to either \emph{all} or \emph{none} of the agents (within the correct state specified by \verb|currentState|).
+In the case of every agent evaluating the global function condition to true (or to the value specified by the \verb|mustEvaluateTo| element) the agent function is applied to \emph{all} of the agents.
+In the case that any of the agents evaluate the global function condition to false (or to the logical opposite of the value specified by the \verb|mustEvaluateTo| element) then the agent function will be applied to \emph{none} of the agents.
+As with an agent function condition a globalCondition consists of a left hand side statement (\verb|lhs|), an operator and a right hand side statement (\verb|rhs|).
+The syntax of the left hand side statement (\verb|lhs|), the operator and the right hand side statement (\verb|rhs|) is the same as with an agent function condition and may use recursion to generate a complex conditional statement.
+The maxItterations element is used to limit the number of times a function guarded by the global condition can be avoided (or evaluated as the logical opposite of the value specified by the \verb|mustEvaluateTo| element).
 For example, the definition at the end of this section, resulting in the following pseudo code condition;
 
-\begin{minted}[fontsize=\small,breaklines]{c}
+\begin{lstlisting}[language=C_]
 (((movement) < (0.25)) == true)
-\end{minted}
+\end{lstlisting}
 May be evaluated as false up to $200$ times (i.e. in $200$ separate simulation iterations) before the global condition will be ignored and the function is applied to every agent.
 Following maximum number of iterations being reached the iteration count is reset once the agent function has been applied.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:globalCondition>
     <lhs>
         <agentVariable>movement</agentVariable>
@@ -621,7 +691,7 @@ Following maximum number of iterations being reached the iteration count is rese
     <gpu:maxItterations>200</gpu:maxItterations>
     <gpu:mustEvaluateTo>true</gpu:mustEvaluateTo>
 </gpu:globalCondition>
-\end{minted}
+\end{lstlisting}
 
 
 \section{Function Layers}
@@ -630,15 +700,15 @@ Following maximum number of iterations being reached the iteration count is rese
 Function layers represent the control flow of the simulation processes.
 The sequence of layers defines the sequential order in which agent functions are executed.
 Complete execution of every layer of agent functions represents a single simulation iteration which may be repeated any number of times.
-Syntatically within the model definition a single layers element must contain at least one (or more) layer element.
+Synthetically within the model definition a single layers element must contain at least one (or more) layer element.
 Each layer element may contain at least one (or more) \mintinline[fontsize=\small]{XML}{gpu}:layerFunction element which defines only a name which must relate to a function name specified within a corresponding \mintinline[fontsize=\small]{text}{xagents/gpu:xagent/functions/gpu:function/name}.
 Within a given layer, the order of execution of layer functions should not be assumed to be sequential (although in the current version of the software it is, future versions will execute functions within the same layer in parallel).
 For the same reason functions within the same layer should not have any communication or internal dependencies (for example via message communications or execution order dependency) in which case they should instead be represented within separate layers which guarantee execution order and global synchronisation between the functions.
 The below example demonstrates the syntax of specifying a simulation consisting of three agent functions.
-There are no dependencies between \mintinline[fontsize=\small]{text}{function1} and \mintinline[fontsize=\small]{text}{function2} which in this case can be thought of as being functions from two different agents definitions with no shared message input or output.
+There are no dependencies between \verb|function1| and \verb|function2| which in this case can be thought of as being functions from two different agents definitions with no shared message input or output.
 
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <layers>
     <layer>
         <gpu:layerFunction>
@@ -654,7 +724,7 @@ There are no dependencies between \mintinline[fontsize=\small]{text}{function1} 
         </gpu:layerFunction>
     </layer>
 </layers>
-\end{minted}
+\end{lstlisting}
 
 
 \section{Initial XML Agent Data}
@@ -671,7 +741,7 @@ If the initial agent data XML file neglects to specify the value of a variable d
 If an element defines a variable name which does not exist within the XMML model definition then a warning is generated and the value is ignored.
 The example below represents a single agent corresponding to the agent definition in \cref{sec:23}.
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <states>
     <itno>0</itno>
     <xagent>
@@ -683,7 +753,7 @@ The example below represents a single agent corresponding to the agent definitio
     </xagent>
     <xagent>...</xagent>
 </states>
-\end{minted}
+\end{lstlisting}
 
 Care must be taken in ensuring that the set of initial data for the simulation does not exceed any of the defined bufferSize (i.e. the maximum number of a given type of agents) for any of the agents.
 If buffer size is exceeded during initial loading of the initial agent data then the simulation will produce an error.
@@ -696,7 +766,7 @@ Furthermore the simulation will expect to find initial agents stored within the 
 
 Simulation constants (or global variables) specified within the model file (as described in \cref{sec:229}) can be set within the initial XML agent data within an environment label between the itno and xagent elements. Environment variables should be set within an XML element with a name corresponding to the environment variable name. E.g. An environment variable defined within the model file as;
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <gpu:constants>
     <gpu:variable>
         <type>int</type>
@@ -705,18 +775,18 @@ Simulation constants (or global variables) specified within the model file (as d
         <defaultValue>1</defaultValue>
     </gpu:variable>
 </gpu:constants>
-\end{minted}
+\end{lstlisting}
 
 Could be defined within an initial XML agents file as follows;
 
-\begin{minted}[fontsize=\small,breaklines]{XML}
+\begin{lstlisting}[language=XML]
 <states>
 <itno>0</itno>
     <environment>
         <my_variable>2</my_variable>
     </environment>
 ...
-\end{minted}
+\end{lstlisting}
 
 Note that the value obtained from the initial XML agents file will over-wite any default value.
 
@@ -775,14 +845,14 @@ The return type of FLAME GPU functions is always \mintinline[fontsize=\small]{te
 A return value of anything other than $0$ indicates that the agent has dies and should be removed from the simulation (unless the agent function definition had specifically set the reallocate element value to false in which case any agent deaths will be ignored).
 
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __FLAME_GPU_FUNC__ int function1(xmachine_memory_myAgent* xmemory)
 {
     xmemory->x = xmemory->x += 0.01f;
     xmemory->no_movements += 1;
     return 0;
 }
-\end{minted}
+\end{lstlisting}
 
 \section{Use of the Message Output Simulation API}
 \label{sec:34}
@@ -792,9 +862,9 @@ Within an agent function script message output is possible by using a message ou
 For each message type defined within the XMML model definition the dynamically generated simulation API will create a message output function of the following form; 
 
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{verbatim}
 add_message_name_message(message_name_messages, args...);
-\end{minted}
+\end{verbatim}
 
 Where \mintinline[fontsize=\small]{text}{message_name} refers to the value of the messages name element within the message specification and \mintinline[fontsize=\small]{text}{args} is a list of named arguments which correspond to the message variables (see \cref{sec:241}).
 Agent functions may only call a message output function for the message name defined within the function definitions output (see \cref{sec:252}).
@@ -803,7 +873,7 @@ Agents are only permitted to output a single message per agent function and repe
 The example below demonstrates an agent function (\mintinline[fontsize=\small]{text}{output_message}) belonging to an agent named myAgent which outputs a message with four variables.
 For clarity the message output function prototype (normally found in header.h) is also shown.
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 add_location_message(xmachine_message_location_list* location_messages, int id, float x, float y, float z);
 
 __FLAME_GPU_FUNC__ int output_message(xmachine_memory_myAgent* xmemory, xmachine_message_location_list* location_messages)
@@ -819,7 +889,7 @@ __FLAME_GPU_FUNC__ int output_message(xmachine_memory_myAgent* xmemory, xmachine
 
     return 0;
 }
-\end{minted}
+\end{lstlisting}
 
 \section{Use of the Message Input Simulation API}
 \label{sec:35}
@@ -848,7 +918,7 @@ The while loop continues until the get next message API function returns a NULL 
 In the below example the location message is used to calculate an average position of all the locations specified in the message list.
 The agent then updates three of its positional values to move towards the average location (cohesion).
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __FLAME_GPU_FUNC__ int input_messages(xmachine_memory_myAgent* xmemory, xmachine_message_location_list* location_messages)
 {
     int count;
@@ -887,7 +957,7 @@ __FLAME_GPU_FUNC__ int input_messages(xmachine_memory_myAgent* xmemory, xmachine
 
     return 0;
 }
-\end{minted}
+\end{lstlisting}
 
 \subsection{Spatially Partitioned Message Iteration}
 \label{sec:352}
@@ -905,7 +975,7 @@ This is important as the messages returned by the get next message function repr
 On average roughly 1/3 of these values will be within the actually range specified by the message definitions range value.
 
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __FLAME_GPU_FUNC__ int input_messages(xmachine_memory_location* xmemory, xmachine_message_location_list* location_messages, xmachine_message_location_PBM* partition_matrix)
 {
     int count;
@@ -948,7 +1018,7 @@ __FLAME_GPU_FUNC__ int input_messages(xmachine_memory_location* xmemory, xmachin
     xmemory->z += avg_z * SMALL_NUMBER;
     return 0;
 }
-\end{minted}
+\end{lstlisting}
 
 \subsection{Discrete Partitioned Message Iteration}
 \label{sec:353}
@@ -963,7 +1033,7 @@ This parameterisation is required as underlying implementation of the message AP
 The example below shows an agent function (\mintinline[fontsize=\small]{text}{input_messages}) of a discrete agent (named cell) which iterates a message list (of state messages) to count the number neighbours with a state value of $1$.
 The differences between the function arguments in the section describing non partitioned message iteration are highlighted in red as is the function parameterisation.
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __FLAME_GPU_FUNC__ int input_messages(xmachine_memory_cell* xmemory, xmachine_message_state_list* state_messages)
 {
     int neighbours = 0;
@@ -979,7 +1049,7 @@ __FLAME_GPU_FUNC__ int input_messages(xmachine_memory_cell* xmemory, xmachine_me
     xmemory->neighbours = neighbours;
     return 0;
 }
-\end{minted}
+\end{lstlisting}
 
 % \subsection{Graph-Based Communication Message Iteration}
 % \label{sec:graph-comm-message-iteration}
@@ -991,15 +1061,17 @@ __FLAME_GPU_FUNC__ int input_messages(xmachine_memory_cell* xmemory, xmachine_me
 
 Within an agent function script agent output is possible by using a message output API function.
 For each agent type defined within the XMML model definition the dynamically generated simulation code will create an agent output function of the following form; 
-\mintinline[fontsize=\small]{text}{add_agent_name_agent(agent_name_agent, args...);}
+\begin{verbatim}
+add_agent_name_agent(agent_name_agent, args...);
+\end{verbatim}
 
-Where \mintinline[fontsize=\small]{text}{agent_name} refers to the value of the agents name element within the agent specification and \mintinline[fontsize=\small]{text}{args} is a list of named arguments which correspond to the agents memory variables (see \cref{sec:253}).
+Where \verb|agent_name| refers to the value of the agents name element within the agent specification and \verb|args| is a list of named arguments which correspond to the agents memory variables (see \cref{sec:253}).
 Agent functions may only output a single type of agent and are only permitted to output a single agent per agent function.
 As with message outputs, repeated calls to an add agent function will result in previous agent information simply being overwritten.
-The example below demonstrates an agent function (\mintinline[fontsize=\small]{text}{create_agent}) which outputs a new agent by creating a clone of itself.
-For clarity the agent output API function prototype (normally found in \mintinline[fontsize=\small]{text}{header.h}) is also shown.
+The example below demonstrates an agent function (\verb|create_agent|) which outputs a new agent by creating a clone of itself.
+For clarity the agent output API function prototype (normally found in \verb|header.h|) is also shown.
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 add_myAgent_agent(xmachine_memory_myAgent_list* myAgent_agents, int id, float x, float y, float z);
 
 __FLAME_GPU_FUNC__ int output_message(xmachine_memory_myAgent* xmemory, xmachine_memory_myAgent_list* myAgent_agents)
@@ -1013,19 +1085,19 @@ __FLAME_GPU_FUNC__ int output_message(xmachine_memory_myAgent* xmemory, xmachine
     add_myAgent_agent(myAgent_agents, id, x, y, z);
     return 0;
 }
-\end{minted}
+\end{lstlisting}
 
 
 \section{Using Random Number Generation}
 \label{sec:37}
 
 
-Random number generation is provided via the \mintinline[fontsize=\small]{text}{rnd} API function which uses template parameterisation to distinguish between either discrete (where a parameter value of \mintinline[fontsize=\small]{text}{DISCRETE_2D} should be used) or continuous (where a parameter value of \mintinline[fontsize=\small]{text}{CONTINUOUS} should be used) spaced agents.
-If a template parameter value is not specified then the simulation will assume a \mintinline[fontsize=\small]{text}{DISCRETE_2D} value which will work in either case but is more computationally expensive.
-The API function has a single argument, a pointer to a \mintinline[fontsize=\small]{text}{RNG_rand48} structure which contains random seeds and is passed to agent functions which specify a true value for the RNG element in the XMML function definition.
+Random number generation is provided via the \verb|rnd| API function which uses template parameterisation to distinguish between either discrete (where a parameter value of \verb|DISCRETE_2D| should be used) or continuous (where a parameter value of \verb|CONTINUOUS| should be used) spaced agents.
+If a template parameter value is not specified then the simulation will assume a \verb|DISCRETE_2D| value which will work in either case but is more computationally expensive.
+The API function has a single argument, a pointer to a \verb|RNG_rand48| structure which contains random seeds and is passed to agent functions which specify a true value for the RNG element in the XMML function definition.
 The example below shows a simple agent function (with no input or outputs) demonstrating the random number generation to determine if the agent should die.
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 #define DEATH_RATE 0.1f
 
 __FLAME_GPU_FUNC__ int kill_agent(xmachine_memory_myAgent* agent, RNG_rand48* rand48)
@@ -1040,7 +1112,7 @@ __FLAME_GPU_FUNC__ int kill_agent(xmachine_memory_myAgent* agent, RNG_rand48* ra
     
     return die;
 }
-\end{minted}
+\end{lstlisting}
 
 \section{Summary of Agent Function Arguments}
 \label{sec:38}
@@ -1050,45 +1122,45 @@ Agent functions may use any combination of message input, output, agent output a
 The following pseudo code demonstrates the order of a function containing all possible arguments.
 When specifying an agent function declaration this order must be observed.
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __FLAME_GPU_FUNC__ int function(xmachine_memory_agent_name* agent,
                                 xmachine_memory_ agent_name _list* output_agents,
                                 xmachine_message_message_name_list* input_messages,
                                 xmachine_message_message_name_PBM* input_message_PBM,
                                 xmachine_message_message_name_list* output_messages,
                                 RNG_rand48* rand48);
-\end{minted}
+\end{lstlisting}
 
 \section{Setting Simulation Constants (Global Variables)}
 \label{sec:39}
 
 
-Simulation constants defined within the environment section of the XMML model definition (or the intial agents state file) may be directly referenced within an agent function using the name specified within the variable definition (see \cref{sec:221}).
+Simulation constants defined within the environment section of the XMML model definition (or the initial agents state file) may be directly referenced within an agent function using the name specified within the variable definition (see \cref{sec:221}).
 It is not possible to set constant variables within an agent function however, the simulation API creates methods for setting simulation constants which may be called either at the start of the simulation (either manually or within an initialisation function) or between simulation iterations (for example as part of an interactive visualisation).
-The code below demonstrates the function prototype for setting a simulation constant with the name \mintinline[fontsize=\small]{text}{A_CONSTANT}.
+The code below demonstrates the function prototype for setting a simulation constant with the name \verb|A_CONSTANT|.
 
 
-\begin{minted}[fontsize=\small,breaklines]{C}
-extern "C" void set\_A\_CONSTANT (float* h\_A\_CONSTANT);
-\end{minted}
+\begin{lstlisting}[language=C_]
+extern "C" void set_A_CONSTANT (float* h_A_CONSTANT);
+\end{lstlisting}
 
-The function is declared using the extern keyword which allows it to be linked to by externally compiled code such as a visualisation or custom simulation loop.
+The function is declared using the \verb|extern| keyword which allows it to be linked to by externally compiled code such as a visualisation or custom simulation loop.
 
 \subsection{Initialisation Functions}
 \label{sec:391}
 
 
 Any initialisation functions defined within the XMML model file (see \cref{sec:223}) are expected to be declared within an agent function code file and will automatically be called before the first simulation iteration.
-The initialisation function declaration should be preceded with a \mintinline[fontsize=\small]{text}{__FLAME_GPU_INIT_FUNC__} macro definition, should have no arguments and should return void.
-The below example demonstrated an initialisation function named initConstants which uses the simulation APIs dynamically created constants functions to set a constant named \mintinline[fontsize=\small]{text}{A_CONSTANT}. 
+The initialisation function declaration should be preceded with a \verb|__FLAME_GPU_INIT_FUNC__| macro definition, should have no arguments and should return void.
+The below example demonstrated an initialisation function named initConstants which uses the simulation APIs dynamically created constants functions to set a constant named \verb|A_CONSTANT|. 
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __FLAME_GPU_INIT_FUNC__ void initConstants()
 {
     float const_value = 8.25f;
     set_A_CONSTANT(&const_value);
 }
-\end{minted}
+\end{lstlisting}
 
 
 \subsection{Step Functions}
@@ -1096,12 +1168,12 @@ __FLAME_GPU_INIT_FUNC__ void initConstants()
 
 If a step function was defined in the XMMl model file (section \ref{sec:stepFunc}) then it should be defined in a similar way to the initialisation functions as described above in section \ref{sec:391}. These functions will be called after each iteration step. An example is shown below
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __FLAME_GPU_STEP_FUNC__ void some_step_func()
 {
     do_step_operation();
 }
-\end{minted}
+\end{lstlisting}
 
 
 \subsection{Exit Functions}
@@ -1109,34 +1181,34 @@ __FLAME_GPU_STEP_FUNC__ void some_step_func()
 
 If an exit function was defined in the XMMl model file (section \ref{sec:endFunc}) then it should be defined in a similar way to the initialisation and step functions as described above. It will be called upon finishing the program. An example is shown below
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __FLAME_GPU_EXIT_FUNC__ void some_exit_func()
 {
     calculate_agent_position_average();
     print_to_file();
 }
-\end{minted}
+\end{lstlisting}
 
 \section{Instrumentation for timing and population sizes}
 \label{sec:TimingAndPop}
 
-It is possible to obtain information of population and timinings of different functions by taking advantage of cuda timing events. Per-iteration and per-function (init/agent/step/exit functions) timing using cuda events, and also the population size for each agent state per iteration printed to stdout.
+It is possible to obtain information of population and timings of different functions by taking advantage of cuda timing events. Per-iteration and per-function (init/agent/step/exit functions) timing using CUDA events, and also the population size for each agent state per iteration printed to stdout.
 
 This instrumentation is enabled with a set of defines. The value must be a positive non-zero integer (i.e. 1) to be enabled.
 
 When enabled, the relevant measures are printed to stdout, which can then later be parsed to produce graphs, etc.
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 #define INSTRUMENT_ITERATIONS 1
 #define INSTRUMENT_AGENT_FUNCTIONS 1
 #define INSTRUMENT_INIT_FUNCTIONS 1
 #define INSTRUMENT_STEP_FUNCTIONS 1
 #define INSTRUMENT_EXIT_FUNCTIONS 1
 #define OUTPUT_POPULATION_PER_ITERATION 1
-\end{minted}
+\end{lstlisting}
 
 will print out, for example
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 processing Simulation Step 1
 Instrumentation: Circle_outputdata = 0.304128 (ms)
 Instrumentation: Circle_inputdata = 16.849920 (ms)
@@ -1146,33 +1218,33 @@ Instrumentation: stepFunction = 27.652096 (ms)
 agent_Circle_default_count: 1024
 Instrumentation: Iteration Time = 46.309376 (ms)
 Iteration 1 Saved to XML
-\end{minted}
+\end{lstlisting}
 
 \section{Simulation functions}
 
-These simulation functions are ran independent of agents. More technically they are called on the CPU, but are able to execute GPU functions using the usual CUDA notation. These functions are defined in the dynamically created file \mintinline[fontsize=\small]{text}{simulation.cu}. There are numerous functions which can be called which will be explained in the proceeding sections. These functions can be called during any host/CPU function such as the init, step and end FLAME calls (see section \ref{sec:223} to \ref{sec:endFunc} and \ref{sec:391} to \ref{sec:endFuncScript}).
+These simulation functions are ran independent of agents. More technically they are called on the CPU, but are able to execute GPU functions using the usual CUDA notation. These functions are defined in the dynamically created file \verb|simulation.cu|. There are numerous functions which can be called which will be explained in the proceeding sections. These functions can be called during any host/CPU function such as the init, step and end FLAME calls (see section \ref{sec:223} to \ref{sec:endFunc} and \ref{sec:391} to \ref{sec:endFuncScript}).
 
 \subsection{Sort agents}
 
 %function definition
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 void sort_agent_default(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_agent_list* agents))
-\end{minted}
+\end{lstlisting}
 
 %description of function
 This function will sort the agent type called \mintinline[fontsize=\small]{text}{agent} using key-value pairs. The function takes as an argument a function pointer to a GPU \mintinline[fontsize=\small]{text}{__global__} function. This function it points to takes two unsigned int arrays in which it will store the resulting key and value data, and \mintinline[fontsize=\small]{text}{xmachine_memory_agent_list} which contains a structure of arrays of the agent. This type is generated dynamically depending on the agent variables defined in the XML model file (section \ref{sec:231}). For an agent with 2 float variables x and y, it has the following structure:
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 struct xmachine_memory_pedestrian_list 
 {	
     float x [xmachine_memory_agent_MAX];
     float y [xmachine_memory_agent_MAX];
 }
-\end{minted}
+\end{lstlisting}
 
 The value \mintinline[fontsize=\small]{text}{xmachine_memory_agent_MAX} is the and buffer size of number of agents (section \ref{sec:23}). This struct can be accessed to assign agent data to the key and value arrays. The following example is given within a FLAME step function which sorts agents by 1D position
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 __global__ void gen_keyval_pairs(unsigned int* keys, unsigned int* values, xmachine_memory_agent_list* agents) {
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
 
@@ -1198,15 +1270,15 @@ __FLAME_GPU_STEP_FUNC__ void sort_func() {
     //Since we run GPU code, make sure all threads are synchronized.
 	cudaDeviceSynchronize();
 }
-\end{minted}
+\end{lstlisting}
 
 \subsection{Analytic functions}
-A dynamically generated reduce is made for all agent variables for each state. Dynamically generated count will only occur for single-values int variables. Reduce sums over a particular variable type for all agents in a state and returns the grand total. Count checks how many values are equal to the given input and returns the quantity that match. These can be called from any \mintinline[fontsize=\small]{text}{__FLAME_GPU__} init, step and end func.Technical: calls thrust reduce or count. 
+A dynamically generated reduce is made for all agent variables for each state. Dynamically generated count will only occur for single-values int variables. Reduce sums over a particular variable type for all agents in a state and returns the grand total. Count checks how many values are equal to the given input and returns the quantity that match. These can be called from any \verb|__FLAME_GPU__| init, step and end func.Technical: calls thrust reduce or count. 
 
-\begin{minted}[fontsize=\small,breaklines]{C}
+\begin{lstlisting}[language=C_]
 reduce_name_state_varName_variable();
 count_name_state_varName_variable(int count_value);
-\end{minted}
+\end{lstlisting}
 
 
 
@@ -1225,16 +1297,16 @@ The host machine must also be running windows with a copy of the .NET runtime (u
 \label{sec:42}
 
 
-\Cref{sec:38} previously described the exact argument order for agent function declarations however in most cases it is sensible to use the provided XSLT template (\mintinline[fontsize=\small]{text}{functions.xslt} located in the \emph{FLAMEGPU/templates} folder within the FLAME GPU SDK) to generate a agent function source file with empty agent function declarations automatically using your XMML model file.
+\Cref{sec:38} previously described the exact argument order for agent function declarations however in most cases it is sensible to use the provided XSLT template (\verb|functions.xslt| located in the \emph{FLAMEGPU/templates} folder within the FLAME GPU SDK) to generate a agent function source file with empty agent function declarations automatically using your XMML model file.
 Once this has been generated the agent function scripts can be implemented within the function declarations rather easily.
 Care must however be taken in ensuring that if the XMML model file is later modified that the agent function arguments are updated manually where necessary.
 Likewise be careful not to overwrite any existing function source file when generating a new one using the XSLT template.
 Generation of blank function source files is not incorporated into the visual studio template project and must be manually accomplished.
-A .NET based XSLT processor is provided within the FLAME GPU SDK for this purpose (\mintinline[fontsize=\small]{text}{XSLTProcessor.exe} located in the \mintinline[fontsize=\small]{text}{tools} folder) and can be used via the command line as follows (or via the \mintinline[fontsize=\small]{text}{GenerateFunctionsFileTemplate} batch file located in the \mintinline[fontsize=\small]{text}{tools} folder of the FLAME GPU SDK);
+A .NET based XSLT processor is provided within the FLAME GPU SDK for this purpose (\verb|XSLTProcessor.exe| located in the \verb|tools| folder) and can be used via the command line as follows (or via the \verb|text|{GenerateFunctionsFileTemplate} batch file located in the \verb|tools| folder of the FLAME GPU SDK);
 
-\begin{minted}[fontsize=\small,breaklines]{text}
+\begin{verbatim}
 XSLTProcessor.exe XMLModelFile.xml functions.xslt functions.c
-\end{minted}
+\end{verbatim}
 
 Alternatively any compliant XSLT processor such as Xalan, Unicorn or even Firefox web browser can be used.
 
@@ -1293,7 +1365,7 @@ Within the FLAME GPU examples and template projects code is organised into the f
         Within the FLAME GPU examples this folder is typically used to sore any model specific visualisation code which replaces the dynamically generated visualisation source file.
 \end{itemize}
 
-The physical folders of the SDK structure a self explanatory however it is worth noting that executable files generated by the Visual Studio build processes are output in the SDKs \mintinline[fontsize=\small]{text}{bin} folder which also contains the CUDA run time \mintinline[fontsize=\small]{text}{dlls}. 
+The physical folders of the SDK structure a self explanatory however it is worth noting that executable files generated by the Visual Studio build processes are output in the SDKs \verb|bin| folder which also contains the CUDA run time \verb|dlls|. 
 
 
 \subsection{Build Processes}
@@ -1301,7 +1373,8 @@ The physical folders of the SDK structure a self explanatory however it is worth
 
 The Visual Studio build process consists of a number of stages which call various tools, compilers and linkers.
 The first of these is the FLAME GPU build tool (described in more detail in the following section) which generates the dynamic simulation code from the FLAME GPU templates and mode file.
-Following this the simulation code (within the Dynamic Code folder) is built using the CUDA build rule which compiles the source files using the NVIDIA CUDA compiler \mintinline[fontsize=\small]{text}{nvcc}.
+Following this the simulation code (within the Dynamic Code folder) is built using the CUDA build rule which compiles the source files using the NVIDIA CUDA compiler 
+\verb|nvcc|.
 Finally any C or C++ source files are compiled using MSVC compiler and are then linked with the CUDA object files to produce the executable.
 To start the build processes select the ``Build'' menu followed by ``Build Solution'' or use the F7 hotkey.
 If the first build step in the Visual Studio skips the FLAME GPU build tool a complete rebuilt can be forced by selecting the ``Build'' menu followed by ``Rebuild Solution'' (or Ctrl + Alt + F7).
@@ -1343,7 +1416,97 @@ The Command Arguments have been set the simulation executable can be launched by
 \section{Compilation using Make}
 \label{sec:compilation-makefile}
 
-\textbf{@todo}
+Linux compilation is controlled using \verb|make|, with makefiles provided for each example. 
+
+%\paragraph{Installing dependencies \& build tools}
+%How to setup, build, and run FLAMEGPU examples on Linux
+\begin{enumerate}
+\item Install \href{http://www.ubuntu.com/download}{Ubuntu} 16.04 or later. 
+\item Install all the needed build tools and libraries:  
+    
+\begin{verbatim}
+sudo apt-get install g++ git make libxml2-utils
+\end{verbatim}
+
+Minimum supported versions are \verb|g++ 4.8| and \verb|cuda 7.5|.
+
+\item Clone the project using Git (it will be stored in the folder "FLAMEGPU"):  
+
+\begin{verbatim}
+git clone https://github.com/FLAMEGPU/FLAMEGPU.git
+\end{verbatim}
+
+Going forward, you will want to pull from the \textit{master} branch, which will always contain the last known release.
+
+\item Build the SDK in Release mode (this is the default mode):
+
+\begin{verbatim}
+cd FLAMEGPU/examples
+make
+\end{verbatim}
+
+This will process the XML model and build both console and visualisation version of the model in release mode. You can build the Debug version by specifying \verb|dbg| value on the make line instead (\verb|make all dbg=1|).  Moreover, for each example, exacutables can also be built in either Visualisation (\verb|make Visualisation_mode|) or Console (\verb|make Console_mode|) mode.
+
+\begin{verbatim}
+cd examples/{folder name}
+make XSLTPREP
+make Visualisation_mode
+# or
+make Console_mode
+\end{verbatim}
+
+Replace \verb|{folder name}| with the name of the example folder.
+
+\item  After building the executables, simply run the examples by executing the relevant bash script inside the "bin/linux-x64" folder:
+
+\begin{itemize}
+\item Visualisation mode: \textit{./*\_vis.sh}
+\item Console mode: \textit{./*\_console.sh iter='arg'}
+\end{itemize}
+
+Alternatively, run the executables from each example folder (\verb|cd examples/{folder name}|) using \verb|make|.
+
+\begin{itemize}
+\item Visualisation mode: \verb|make run_vis|
+\item Console mode: \verb|make run_console iter='arg'|
+\end{itemize}
+
+
+Both the  \verb|make run_console| and  \textit{run script} commands will call the executable by passing the \verb|iterations/0.xml| starting stats file as the program augment with a default single simulation iteration. 
+
+Note: XML output is disabled but can be re-enabled by setting the \verb|XML_OUTPUT| definition in the automatically generated \verb|src/dynamic/main.cu| file to 1. After rebuilding and running the simulation again this will create an XML file (saved in the location of the initial input file) for each iteration which will contain the state of the agents after applying a single simulation iteration to the agents (in the same formal as \verb|0.xml|. You can view this file (via \verb|cat| command) to see how the agent properties have changed. 
+
+The parameters passed to the simulation are the initial model file and the number of simulation runs (iterations). Note that by default, the number of iterations is set to 1. In order to modify the number of iterations, simply pass an argument to the shell script (e.g: \verb|iter=50|):
+
+
+\item Debugging examples:
+\begin{verbatim}
+cd examples/{folder name}
+make Console_mode dbg=1
+\end{verbatim}
+
+\begin{itemize}
+\item Debugging with \verb|cuda-gdb|
+\begin{verbatim}
+cuda-gdb ../../bin/x64/Debug_Console/{folder name}_console
+..
+(cuda-gdb) run iterations/0.xml 2
+...
+\end{verbatim}
+
+\item Debugging with \verb|valgrind|
+\begin{verbatim}
+valgrind --tool=memcheck {executable} iterations/0.xml 1
+\end{verbatim}
+, where \textit{{executable}} is \verb|../../bin/x64/Debug_Console/{folder name}_console|.
+\end{itemize}
+
+\item Clean generated dynamic and object files with \verb|make clobber|. Note that you need to use \verb|make XSLTPREP| to generate the \verb|.cu| files first, then build a specific target (console or visualisation mode). \verb|make all| would generate the dynamic files as well as building the executables. And \verb|make clean| only deletes the object files and leaves the \verb|.cu| files behind.
+
+\item For more details on how to build specific targets for each example, run
+\verb|make help|
+\end{enumerate}
+
 
 \section{Simulation Execution Modes and Options}
 \label{sec:45}
@@ -1362,9 +1525,9 @@ The second argument is the number of simulation iterations which should be proce
 A number of optional CUDA arguments may also be passed (i.e.
 device=1 to specify the second CUDA enabled GPU device within the host machine should be used for simulation) if required.
 
-\begin{minted}[fontsize=\small,breaklines]{text}
-FLAMEGPU\_simulation.exe {[}XML model data{]} {[}Iterations{]} {[}Optional CUDA arguments{]}
-\end{minted}
+\begin{verbatim}
+FLAMEGPU_simulation.exe [XML model data] [Iterations] [Optional CUDA arguments]
+\end{verbatim}
 
 The result of running the simulation will be a number of output XML files which will be numbered from 1 to n, where n is the number of simulations specified by the iterations argument.
 It is possible to turn XML output on or off by changing the definition of the OUTPUT\_TO\_XML macro located within the main.xslt template to true (1) false (0).
@@ -1376,24 +1539,24 @@ Simulation executables built for visualisation require only a single argument (u
 The number of simulations iterations is not required as the simulation will run indefinitely until the visualisation is closed.
 As with console execution it is possible to specify optional CUDA arguments.
 
-\begin{minted}[fontsize=\small,breaklines]{text}
-Usage: main {[}XML model data{]} {[}Optional CUDA arguments{]}
-\end{minted}
+\begin{verbatim}
+Usage: main [XML model data] [Optional CUDA arguments]
+\end{verbatim}
 
 Many of the options for the default visualisation are contained within the visualisation.h header file and include the following;
 
 \begin{itemize}
-    \item \mintinline[fontsize=\small]{text}{SIMULATION_DELAY} -- Many simulations are executed extremely quickly making visualisation a blur.
+    \item \verb|SIMULATION_DELAY| -- Many simulations are executed extremely quickly making visualisation a blur.
         This definition allows an artificial delay by executing this number of visualisation draw loops before each simulation iteration is processed.
-    \item \mintinline[fontsize=\small]{text}{WINDOW_WIDTH} and \mintinline[fontsize=\small]{text}{WINDOW_HEIGHT} -- Specifies the size of the visualisation window 
-    \item \mintinline[fontsize=\small]{text}{NEAR_CLIP} and \mintinline[fontsize=\small]{text}{FAR_CLIP} -- Specifies the near an far clipping plane used for OpenGL rendering.
-    \item \mintinline[fontsize=\small]{text}{SPHERE_SLICES} -- The number of slices used to create the sphere geometry representing a single agent in the visualisation.
-    \item \mintinline[fontsize=\small]{text}{SPHERE_STACKS} - The number of stacks used to create the sphere geometry representing a single agent in the visualisation.
-    \item \mintinline[fontsize=\small]{text}{SPHERE_RADIUS} -- The physical size of the sphere geometry representing a single agent in the visualisation.
+    \item \verb|WINDOW_WIDTH| and \verb|WINDOW_HEIGHT| -- Specifies the size of the visualisation window 
+    \item \verb|NEAR_CLIP| and \verb|FAR_CLIP| -- Specifies the near an far clipping plane used for OpenGL rendering.
+    \item \verb|SPHERE_SLICES| -- The number of slices used to create the sphere geometry representing a single agent in the visualisation.
+    \item \verb|SPHERE_STACKS| - The number of stacks used to create the sphere geometry representing a single agent in the visualisation.
+    \item \verb|SPHERE_RADIUS| -- The physical size of the sphere geometry representing a single agent in the visualisation.
         This will need to be a sensible value which corresponds with the environment size and agent locations within your model/simulation.
-    \item \mintinline[fontsize=\small]{text}{VIEW_DISTANCE} -- The camera viewing distance.
+    \item \verb|VIEW_DISTANCE| -- The camera viewing distance.
         Again this will need to be a sensible value which corresponds with the environment size and agent locations within your model/simulation.
-    \item \mintinline[fontsize=\small]{text}{LIGHT_POSITION} -- The visualisation will contain a single light source which will be located at this position.
+    \item \verb|LIGHT_POSITION| -- The visualisation will contain a single light source which will be located at this position.
 \end{itemize}
 
 
@@ -1402,15 +1565,16 @@ Many of the options for the default visualisation are contained within the visua
 
 
 Customised visualisation can easily be integrated to a FLAME GPU project by extending the automatically generated visualisation file (the output of processing visualisation.xslt)
-\footnote{When doing this within Visual Studio it is important to turn off the template processing of the \mintinline[fontsize=\small]{text}{visualisation.xslt} file in each of the launch configurations as processing them will overwrite any custom code!}.
+\footnote{When doing this within Visual Studio it is important to turn off the template processing of the \texttt{visualisation.xslt} file in each of the launch configurations as processing them will overwrite any custom code!}.
 Many of the FLAME GPU SDK examples use customised visualisations in this way.
 As with the default visualisations any custom visualisation must define the following function prototypes defined in the automatically generated simulation header.
 
-\begin{minted}[fontsize=\small,breaklines]{c}
+\begin{lstlisting}[language=C_]
 extern "C" void initVisualisation();
 
 extern "C" void runVisualisation();
-\end{minted}
+\end{lstlisting}
+
 
 The first of these can be used to initialisate any OpenGL memory and CUDA OpengGL bindings as well as displaying the user interface.
 The second of these functions must take control of the simulation by repeatedly calling the draw and singleIteration (which advances the simulation by a single iteration step) functions in a recursive loop.
